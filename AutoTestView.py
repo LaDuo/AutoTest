@@ -8,7 +8,7 @@ class HQFrame(Frame):
         self.root = master
         self.createPage()
 
-    def position(self):
+    def position(self):  # 此函数为createPage函数中Button按钮的点击事件
         var = StringVar()
         with open(Av2_log, 'r', encoding='utf-8') as f:
             LogList = f.readlines()
@@ -18,10 +18,9 @@ class HQFrame(Frame):
         self.T.pack()
         self.T.insert('1.0', chars=LogList[0])
 
-    def createPage(self):
+    def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
         Label(self, text="This is HQ Page!").pack()
-
         Button(self, text="GetPosition", command=self.position).pack()
 
 
