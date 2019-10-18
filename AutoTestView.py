@@ -1,4 +1,5 @@
 from tkinter import *
+from defi import *
 
 
 class HQFrame(Frame):
@@ -7,9 +8,21 @@ class HQFrame(Frame):
         self.root = master
         self.createPage()
 
+    def position(self):
+        var = StringVar()
+        with open(Av2_log, 'r', encoding='utf-8') as f:
+            LogList = f.readlines()
+        # var.set(LogList[0])
+        # Label(self, bg='red', width=5, textvariable=var).pack()
+        self.T = Text(self, width=300, height=3)
+        self.T.pack()
+        self.T.insert('1.0', chars=LogList[0])
+
     def createPage(self):
         # Label(self).grid(row=1, stick=W, pady=10)
         Label(self, text="This is HQ Page!").pack()
+
+        Button(self, text="GetPosition", command=self.position).pack()
 
 
 class WabcoFrame(Frame):
