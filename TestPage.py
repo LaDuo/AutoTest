@@ -1,7 +1,5 @@
 from tkinter import *
-from HQ import *
-from Wabco import *
-from Rocky import *
+from AutoTestView import *
 
 
 class TestPage(object):
@@ -10,28 +8,29 @@ class TestPage(object):
         self.root.geometry('300x300')
         self.create_page()
 
-    def HQ(self):
-        self.frame.destroy()
-        HQPage(self.root)
-
-    def Wabco(self):
-        self.frame.destroy()
-        WabcoPage(self.root)
-
-    def Rocky(self):
-        self.frame.destroy()
-        RockyPage(self.root)
-
     def create_page(self):
-        self.frame = Frame(self.root)
-        self.frame.pack()
-        Label(self.frame, text="Choose your project !").pack()
-
+        self.HQPage = HQFrame(self.root)
+        self.WabcoPage = WabcoFrame(self.root)
+        self.RockyPage = RockyFrame(self.root)
+        self.HQPage.pack()
         menubar = Menu(self.root)
         menubar.add_command(label="HQ", command=self.HQ)
         menubar.add_command(label="Wabco", command=self.Wabco)
         menubar.add_command(label="Rocky", command=self.Rocky)
-        menubar.add_command(label="Quit", command=self.frame.quit)
+        menubar.add_command(label="Quit", command=self.root.quit)
+        self.root['menu'] = menubar  # 设置菜单栏
 
-        self.root.config(menu=menubar)
+    def HQ(self):
+        self.HQPage.pack()
+        self.WabcoPage.pack_forget()
+        self.RockyPage.pack_forget()
 
+    def Wabco(self):
+        self.WabcoPage.pack()
+        self.HQPage.pack_forget()
+        self.RockyPage.pack_forget()
+
+    def Rocky(self):
+        self.RockyPage.pack()
+        self.HQPage.pack_forget()
+        self.WabcoPage.pack_forget()
