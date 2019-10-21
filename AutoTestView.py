@@ -6,22 +6,128 @@ class HQFrame(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.root = master
+        self.map_names = None
+        self.var = StringVar()
         self.createPage()
 
     def position(self):  # 此函数为createPage函数中Button按钮的点击事件
         var = StringVar()
         with open(Av2_log, 'r', encoding='utf-8') as f:
             LogList = f.readlines()
-        # var.set(LogList[0])
-        # Label(self, bg='red', width=5, textvariable=var).pack()
-        self.T = Text(self, width=300, height=3)
-        self.T.pack()
-        self.T.insert('1.0', chars=LogList[0])
+
+    def AvLog(self):  # 将桌面上的Av2_Input文件夹中的Av2 Log合并放置在Av2_Output文件夹中的outfile.txt中
+        files = os.listdir(Av2_Input)
+        res = ""
+        i = 1
+        for file in files:
+            if file.endswith(".txt"):
+                i += 1
+                title = "第%s章 %s" % (i, file[0:len(file) - 4])
+                with open(Av2_Input + "\\" + file, "r", encoding='utf-8') as file:
+                    content = file.read()
+                    file.close()
+                append = "\n%s\n\n%s" % (title, content)
+                res += append
+        with open(Desktop + "\\Av2_Output\\outfile.txt", "w", encoding='utf-8') as outFile:
+            outFile.write(res)
+
+    def CreateMoveMerge(self, var):
+        # 创建根目录
+        map_name = self.var.get()
+        # 等待添加功能，判断用户的输入是否为空，若为空，则弹出报错窗口
+
+        # if
+        try:
+            if not os.path.exists(Analyze):
+                os.mkdir(Analyze)
+                print("创建成功")
+        except FileExistsError:
+            print("目录已存在")
+        # 创建子文件夹
+        str1 = os.path.join(Analyze, datetime.now().strftime("%Y-%m-%d-")) + map_name
+        os.makedirs(str1)
+        os.mkdir(os.path.join(str1, "Av2"))
+        os.mkdir(os.path.join(str1, "EHPLOG"))
+        os.mkdir(os.path.join(str1, "CONFIG"))
+        print("Create folders successful")
+        # 将桌面上的Av2_Input文件夹中的Av2 Log合并放置在Av2_Output文件夹中的outfile.txt中
+        Av2_Input = Desktop + "\\Av2_Input"
+        files = os.listdir(Av2_Input)
+        res = ""
+        i = 1
+        for file in files:
+            if file.endswith(".txt"):
+                i += 1
+                title = "第%s章 %s" % (i, file[0:len(file) - 4])
+                with open(Av2_Input + "\\" + file, "r", encoding='utf-8') as file:
+                    content = file.read()
+                    file.close()
+                append = "\n%s\n\n%s" % (title, content)
+                res += append
+        with open(Desktop + "\\Av2_Output\\outfile.txt", "w", encoding='utf-8') as outFile:
+            outFile.write(res)
+            # 将Av2Simulator中的Log复制一份至Analyze文件夹和Av2_Input文件夹中
+            #####################################################################Av2数据路径需要根据电脑配置更改############################
+            base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径
+            base_path2 = os.path.join(os.path.expanduser('~'), "Desktop") + "\\Av2_Input\\"
+            base_path3 = os.path.join(os.path.expanduser('~'), "Desktop") + "\\Analyze\\" + \
+                         datetime.now().strftime("%Y-%m-%d-") + map_name + "\\Av2"
+            alllist = os.listdir(u"D:\\test\\Release\\log")
+            for i in alllist:
+                if "_Av2数据" in i:
+                    oldname = os.path.join(base_path1, i)
+                    newname1 = os.path.join(base_path2, i)
+                    newname2 = os.path.join(base_path3, i)
+                    shutil.copyfile(oldname, newname1)  # 拷贝到Av2_Input文件夹
+                    shutil.copyfile(oldname, newname2)  # 拷贝到Analyze文件夹
+        # 删除Av2Simulator中的Log文件夹中的内容
+        for j in alllist:
+            if ".txt" in j:
+                path = os.path.join(base_path1, j)
+                os.remove(path)
+        # 压缩文件
+        zip_name = base_path3 + '.zip'
+        z = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED)
+        for dirpath, dirnames, filenames in os.walk(base_path3):
+            fpath = dirpath.replace(base_path3, '')
+            fpath = fpath and fpath + os.sep or ''
+            for filename in filenames:
+                z.write(os.path.join(dirpath, filename), fpath + filename)
+        z.close()
+
+    def DeleteAvLog(self):
+        Avlog_path = "D:\\test\\Release\\log"
+        Avlog1 = os.listdir(Avlog_path)
+        for i in Avlog1:
+            if ".txt" in i:
+                path = os.path.join(Avlog_path, i)
+                os.remove(path)
+        Avlog2 = os.listdir(Av2_Input)
+        for i in Avlog2:
+            if ".txt" in i:
+                path = os.path.join(Avlog_path, i)
+                os.remove(path)
+        Avlog3 = os.listdir(Av2_Output)
+        for i in Avlog3:
+            if ".txt" in i:
+                path = os.path.join(Avlog_path, i)
+                os.remove(path)
 
     def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
-        Label(self, text="This is HQ Page!").pack()
-        Button(self, text="GetPosition", command=self.position).pack()
+        Label(self, text="This is HQ Page!").grid(row=0, column=1, columnspan=2)
+        # ========================Av2 Log==========================
+        # -----------------------------------------------------------------------
+        Label(self, text="请输入回放的路线名：").grid(row=1, column=1)
+        self.map_names = Entry(self, textvariable=self.var)
+        self.map_names.grid(row=1, column=2)
+        Button(self, text="创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=3)
+    # ----------------------------------------------------------------------------------------------
+        Button(self, text="合并Av2Log", command=self.AvLog).grid(row=2, column=1)
+        Button(self, text="删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=2)
+        Button(self, text="获取Av2Log中的Position", command=self.position).grid(row=2, column=3)
+
+    # =======================Ehp Log===========================
 
 
 class WabcoFrame(Frame):
