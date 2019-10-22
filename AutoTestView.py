@@ -213,9 +213,6 @@ class HQFrame(Frame):
                     f.write(n[2:-2])
                     f.write('\n')
 
-    def download_EHPLOG(self):
-        pass
-
     def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
         Label(self, text="This is HQ Page!").grid(row=0, column=1, columnspan=1)
