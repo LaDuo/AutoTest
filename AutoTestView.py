@@ -1,4 +1,5 @@
 from tkinter import *
+
 from defi import *
 
 
@@ -30,6 +31,7 @@ class HQFrame(Frame):
                 res += append
         with open(Desktop + "\\Av2_Output\\outfile.txt", "w", encoding='utf-8') as outFile:
             outFile.write(res)
+        showinfo(title="合并Av Log到outfile文件！", message="合并成功！")
 
     def CreateMoveMerge(self):
         # 创建根目录
@@ -92,7 +94,7 @@ class HQFrame(Frame):
             if ".txt" in j:
                 path = os.path.join(base_path1, j)
                 os.remove(path)
-
+        # ---------------------------------------------------------------------
         # 压缩文件
         # print("正在压缩Avlog")
         # zip_name = base_path3 + '.zip'
@@ -103,11 +105,10 @@ class HQFrame(Frame):
         #     for filename in filenames:
         #         z.write(os.path.join(dirpath, filename), fpath + filename)
         # z.close()
-
-        # ---------------------------------
+        # ---------------------------------------------------------------------
         print("正在下载EHPLOG")
         os.chdir(r'C:\\Users\\z1339\\Desktop')  # 自动下载EHPLOG至Analyze目录下的ALL文件夹中
-        p = Popen("cmd.exe /c" + "C:\\Users\\z1339\\Desktop\\down.bat", stdout=PIPE, stderr=STDOUT)
+        p = Popen("cmd.exe /c" + "C:\\Users\\z1339\\Desktop\\downEhp.bat", stdout=PIPE, stderr=STDOUT)
         curline = p.stdout.readline()
         while curline != b'':
             print(curline)
@@ -123,7 +124,26 @@ class HQFrame(Frame):
         for i in ALL_list:
             n1 = os.path.join(src, i)
             shutil.move(n1, dst)
-
+        # ---------------------------------------------------------------
+        print("正在下载conf")
+        os.chdir(r'C:\\Users\\z1339\\Desktop')  # 自动下载conf至Analyze目录下的ALL文件夹中
+        p = Popen("cmd.exe /c" + "C:\\Users\\z1339\\Desktop\\downconf.bat", stdout=PIPE, stderr=STDOUT)
+        curline = p.stdout.readline()
+        while curline != b'':
+            print(curline)
+            curline = p.stdout.readline()
+        p.wait()
+        print(p.returncode)
+        print("正在转移conf")
+        # ---------------------------------------------------------------
+        # 将Analyze目录中的ALL文件夹中的所有文件拷贝至新建的回放路线文件夹中
+        src = Analyze + "\\ALL"
+        dst = str1 + "\\CONFIG"
+        ALL_list = os.listdir(src)
+        for i in ALL_list:
+            n1 = os.path.join(src, i)
+            shutil.move(n1, dst)
+        showinfo(title="Create Move Download Merge", message="Success！")
 
     def DeleteAvLog(self):
         Avlog_path = "D:\\test\\Release\\log"
@@ -142,9 +162,91 @@ class HQFrame(Frame):
             if ".txt" in i:
                 path = os.path.join(Avlog_path, i)
                 os.remove(path)
+        showinfo(title="Delete AvLog", message="成功删除Av Log")
 
-    def Ehp_position(self):
-        pass
+    def JudgePosition(self):
+        for i in range(len(tmp)):
+            if i == len(tmp) - 1:
+                break
+            j = i + 1
+            # time = position.findall(tmp[i])
+            # speed1 = str(pattern_speed.findall(tmp[i]))
+            # speed2 = str(pattern_speed.findall(tmp[j]))
+            ofs1 = str(pattern_ofs.findall(tmp[i]))
+            ofs2 = str(pattern_ofs.findall(tmp[j]))
+            path1 = str(pattern_path.findall(tmp[i]))
+            path2 = str(pattern_path.findall(tmp[j]))
+            # speed1 = int(re.sub(r'\D', "", speed1))
+            # speed2 = int(re.sub(r'\D', "", speed2))
+            ofs1 = int(re.sub(r'\D', "", ofs1))
+            ofs2 = int(re.sub(r'\D', "", ofs2))
+            path1 = int(re.sub(r'\D', "", path1))
+            path2 = int(re.sub(r'\D', "", path2))
+            # 相同path id情况下，offset递增，反之打印（忽略path id不同的情况）
+            if path1 == 0:
+                continue
+            if (path1 == path2) and (ofs2 >= ofs1):
+                continue
+            elif (path1 == path2) and (ofs2 < ofs1):
+                Err.append(str(tmp[i]))
+                Err.append(str(tmp[j]))
+                Err.append('\n')
+        with open(Err_Position, 'w', encoding="utf-8") as file:
+            for i in range(len(Err)):
+                file.write(str(Err[i]))
+                file.write("\n")
+        showinfo(title="判断", message="判断完成！")
+
+    def Sep_MSG(self):
+        with open(stub_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Stub.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(pos_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pos.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(meta_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Meta.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(seg_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Seg.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prl1_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Long1.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prl2_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Long2.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prl9_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Long9.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prs1_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Sht1.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prs4_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Sht4.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        showinfo(title="提取MSG", message="成功提取各个MSG！")
+
+    def Send_Stub(self):
+        showinfo(title="你成功了！", message="你成功showinfo了")
 
     def merge_info(self):  # 合并EHPLOG中adasisApp、ehrizonApp、localizationApp的INFO文件
         map_name = self.var.get()
@@ -227,9 +329,11 @@ class HQFrame(Frame):
         Button(self, text="删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=1)
         Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
 
+        Button(self, text="判断AvLog的Position的offset", command=self.JudgePosition).grid(row=3, column=0)
+        Button(self, text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=1)
         # =======================Ehp Log===========================
-        Button(self, text="获取EhpLog中的Position", command=self.Ehp_position).grid(row=3, column=0)
-        Button(self, text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=3, column=1)
+        Button(self, text="判断Stub是否发送", command=self.Send_Stub).grid(row=4, column=0)
+        Button(self, text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=4, column=1)
 
 
 class WabcoFrame(Frame):
