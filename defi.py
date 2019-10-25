@@ -1,11 +1,12 @@
 import re
 import os
+import clr
+
 import shutil
 import zipfile
 from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
 from tkinter.messagebox import *
-import os
 
 # 此文件用于添加定义、变量
 Desktop = os.path.join(os.path.expanduser('~'), "Desktop")
@@ -15,7 +16,7 @@ Av2_Output = Desktop + "\\Av2_Output"
 Analyze = Desktop + "\\Analyze"
 base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径
 pos = Desktop + "\\pos.txt"
-Err_Position = Desktop + "\\Err.txt"   # 打印Av2Log中的Position的offset异常
+Err_Position = Desktop + "\\Err.txt"  # 打印Av2Log中的Position的offset异常
 stub_position = Av2_Output + "\\sub&position.txt"
 
 stub_path = Desktop + "\\Av2_Output\\stub.txt"
@@ -27,7 +28,6 @@ prl2_path = Desktop + "\\Av2_Output\\prl2.txt"
 prl9_path = Desktop + "\\Av2_Output\\prl9.txt"
 prs1_path = Desktop + "\\Av2_Output\\prs1.txt"
 prs4_path = Desktop + "\\Av2_Output\\prs4.txt"
-
 
 list_ehp = []
 list_ada = []
@@ -58,5 +58,3 @@ pat_Meta = re.compile(r'Metadata')
 pat_Seg = re.compile(r'Segment: ')
 pat_time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
 po = re.compile(r'path=\d+')
-
-
