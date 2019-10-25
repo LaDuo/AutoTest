@@ -14,9 +14,11 @@ Av2_log = Desktop + "\\Av2_Output\\outfile.txt"
 Av2_Input = Desktop + "\\Av2_Input"
 Av2_Output = Desktop + "\\Av2_Output"
 Analyze = Desktop + "\\Analyze"
-base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径
-pos = Desktop + "\\pos.txt"
-Err_Position = Desktop + "\\Err.txt"  # 打印Av2Log中的Position的offset异常
+# --------------------------------------------------------
+base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径     重点关注   Av2数据路径需要根据电脑配置更改
+# --------------------------------------------------------
+
+Err_Position = Av2_Output + "\\Err.txt"  # 打印Av2Log中的Position的offset异常
 stub_position = Av2_Output + "\\sub&position.txt"
 
 stub_path = Desktop + "\\Av2_Output\\stub.txt"
@@ -34,12 +36,6 @@ list_ada = []
 list_loc = []
 Err = []
 listtt = []
-
-with open(Av2_log, 'r', encoding="utf-8") as f1:
-    lists = f1.readlines()
-
-with open(pos, 'r', encoding="utf-8") as file:
-    tmp = file.readlines()
 
 time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
 pattern_ofs = re.compile(r'ofs=\d+,')

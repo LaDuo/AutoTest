@@ -29,7 +29,7 @@ class HQFrame(Frame):
                     file.close()
                 append = "\n%s\n\n%s" % (title, content)
                 res += append
-        with open(Desktop + "\\Av2_Output\\outfile.txt", "w", encoding='utf-8') as outFile:
+        with open(Av2_log, "w", encoding='utf-8') as outFile:
             outFile.write(res)
         showinfo(title="合并Av Log到outfile文件！", message="合并成功！")
 
@@ -55,10 +55,8 @@ class HQFrame(Frame):
         # print("Create folders successful")
         print("正在复制Av2log到Analyze文件夹和Av2_Input文件夹中")
         # 将Av2Simulator中的Log复制一份至Analyze文件夹和Av2_Input文件夹中
-        # Av2数据路径需要根据电脑配置更改
-        base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径
-        base_path2 = os.path.join(os.path.expanduser('~'), "Desktop") + "\\Av2_Input\\"
-        base_path3 = os.path.join(os.path.expanduser('~'), "Desktop") + "\\Analyze\\" + \
+        base_path2 = Desktop + "\\Av2_Input\\"
+        base_path3 = Desktop + "\\Analyze\\" + \
                      datetime.now().strftime("%Y-%m-%d-") + map_name + "\\Av2"
         alllist = os.listdir(base_path1)
         for i in alllist:
@@ -107,8 +105,8 @@ class HQFrame(Frame):
         # z.close()
         # ---------------------------------------------------------------------
         print("正在下载EHPLOG")
-        os.chdir(r'C:\\Users\\z1339\\Desktop')  # 自动下载EHPLOG至Analyze目录下的ALL文件夹中
-        p = Popen("cmd.exe /c" + "C:\\Users\\z1339\\Desktop\\downEhp.bat", stdout=PIPE, stderr=STDOUT)
+        os.chdir(Desktop)  # 自动下载EHPLOG至Analyze目录下的ALL文件夹中
+        p = Popen("cmd.exe /c" + Desktop + "\\downEhp.bat", stdout=PIPE, stderr=STDOUT)
         curline = p.stdout.readline()
         while curline != b'':
             print(curline)
@@ -126,8 +124,8 @@ class HQFrame(Frame):
             shutil.move(n1, dst)
         # ---------------------------------------------------------------
         print("正在下载conf")
-        os.chdir(r'C:\\Users\\z1339\\Desktop')  # 自动下载conf至Analyze目录下的ALL文件夹中
-        p = Popen("cmd.exe /c" + "C:\\Users\\z1339\\Desktop\\downconf.bat", stdout=PIPE, stderr=STDOUT)
+        os.chdir(Desktop)  # 自动下载conf至Analyze目录下的ALL文件夹中
+        p = Popen("cmd.exe /c" + Desktop + "\\downconf.bat", stdout=PIPE, stderr=STDOUT)
         curline = p.stdout.readline()
         while curline != b'':
             print(curline)
@@ -146,58 +144,26 @@ class HQFrame(Frame):
         showinfo(title="Create Move Download Merge", message="Success！")
 
     def DeleteAvLog(self):
-        Avlog_path = "D:\\test\\Release\\log"
-        Avlog1 = os.listdir(Avlog_path)
+        Avlog1 = os.listdir(base_path1)
         for i in Avlog1:
             if ".txt" in i:
-                path = os.path.join(Avlog_path, i)
+                path = os.path.join(base_path1, i)
                 os.remove(path)
         Avlog2 = os.listdir(Av2_Input)
         for i in Avlog2:
             if ".txt" in i:
-                path = os.path.join(Avlog_path, i)
+                path = os.path.join(base_path1, i)
                 os.remove(path)
         Avlog3 = os.listdir(Av2_Output)
         for i in Avlog3:
             if ".txt" in i:
-                path = os.path.join(Avlog_path, i)
+                path = os.path.join(base_path1, i)
                 os.remove(path)
         showinfo(title="Delete AvLog", message="成功删除Av Log")
 
-    def JudgePosition(self):
-        for i in range(len(tmp)):
-            if i == len(tmp) - 1:
-                break
-            j = i + 1
-            # time = position.findall(tmp[i])
-            # speed1 = str(pattern_speed.findall(tmp[i]))
-            # speed2 = str(pattern_speed.findall(tmp[j]))
-            ofs1 = str(pattern_ofs.findall(tmp[i]))
-            ofs2 = str(pattern_ofs.findall(tmp[j]))
-            path1 = str(pattern_path.findall(tmp[i]))
-            path2 = str(pattern_path.findall(tmp[j]))
-            # speed1 = int(re.sub(r'\D', "", speed1))
-            # speed2 = int(re.sub(r'\D', "", speed2))
-            ofs1 = int(re.sub(r'\D', "", ofs1))
-            ofs2 = int(re.sub(r'\D', "", ofs2))
-            path1 = int(re.sub(r'\D', "", path1))
-            path2 = int(re.sub(r'\D', "", path2))
-            # 相同path id情况下，offset递增，反之打印（忽略path id不同的情况）
-            if path1 == 0:
-                continue
-            if (path1 == path2) and (ofs2 >= ofs1):
-                continue
-            elif (path1 == path2) and (ofs2 < ofs1):
-                Err.append(str(tmp[i]))
-                Err.append(str(tmp[j]))
-                Err.append('\n')
-        with open(Err_Position, 'w', encoding="utf-8") as file:
-            for i in range(len(Err)):
-                file.write(str(Err[i]))
-                file.write("\n")
-        showinfo(title="判断", message="判断完成！")
-
     def Sep_MSG(self):
+        with open(Av2_log, 'r', encoding="utf-8") as f1:
+            lists = f1.readlines()
         with open(stub_path, 'w', encoding="utf-8") as file:
             for i in range(len(lists)):
                 a = pat_Stub.findall(lists[i])
@@ -244,6 +210,41 @@ class HQFrame(Frame):
                 if a:
                     file.write(str(lists[i]))
         showinfo(title="提取MSG", message="成功提取各个MSG！")
+
+    def JudgePosition(self):
+        with open(pos_path, 'r', encoding="utf-8") as file:
+            tmp = file.readlines()
+        for i in range(len(tmp)):
+            if i == len(tmp) - 1:
+                break
+            j = i + 1
+            # time = position.findall(tmp[i])
+            # speed1 = str(pattern_speed.findall(tmp[i]))
+            # speed2 = str(pattern_speed.findall(tmp[j]))
+            ofs1 = str(pattern_ofs.findall(tmp[i]))
+            ofs2 = str(pattern_ofs.findall(tmp[j]))
+            path1 = str(pattern_path.findall(tmp[i]))
+            path2 = str(pattern_path.findall(tmp[j]))
+            # speed1 = int(re.sub(r'\D', "", speed1))
+            # speed2 = int(re.sub(r'\D', "", speed2))
+            ofs1 = int(re.sub(r'\D', "", ofs1))
+            ofs2 = int(re.sub(r'\D', "", ofs2))
+            path1 = int(re.sub(r'\D', "", path1))
+            path2 = int(re.sub(r'\D', "", path2))
+            # 相同path id情况下，offset递增，反之打印（忽略path id不同的情况）
+            if path1 == 0:
+                continue
+            if (path1 == path2) and (ofs2 >= ofs1):
+                continue
+            elif (path1 == path2) and (ofs2 < ofs1):
+                Err.append(str(tmp[i]))
+                Err.append(str(tmp[j]))
+                Err.append('\n')
+        with open(Err_Position, 'w', encoding="utf-8") as file:
+            for i in range(len(Err)):
+                file.write(str(Err[i]))
+                file.write("\n")
+        showinfo(title="判断", message="判断完成！")
 
     def Send_Stub(self):
         showinfo(title="你成功了！", message="你成功showinfo了")
