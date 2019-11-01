@@ -11,11 +11,6 @@ class HQFrame(Frame):
         self.var = StringVar()
         self.createPage()
 
-    def Av_position(self):  # 此函数为createPage函数中Button按钮的点击事件
-        var = StringVar()
-        with open(Av2_log, 'r', encoding='utf-8') as f:
-            LogList = f.readlines()
-
     def AvLog(self):  # 将桌面上的Av2_Input文件夹中的Av2 Log合并放置在Av2_Output文件夹中的outfile.txt中
         files = os.listdir(Av2_Input)
         res = ""
@@ -209,6 +204,14 @@ class HQFrame(Frame):
                 a = pat_Pro_Sht4.findall(lists[i])
                 if a:
                     file.write(str(lists[i]))
+        with open(pos_stub_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_stub.findall(lists[i])
+                b = pat_Pos.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+                elif b:
+                    file.write(str(lists[i]))
         showinfo(title="提取MSG", message="成功提取各个MSG！")
 
     def JudgePosition(self):
@@ -247,7 +250,14 @@ class HQFrame(Frame):
         showinfo(title="判断", message="判断完成！")
 
     def Send_Stub(self):
-        showinfo(title="你成功了！", message="你成功showinfo了")
+        pass
+        # with open(Av2_log, 'r', encoding='utf-8') as f:
+        #     LogList = f.readlines()
+        # with open(Err_Stub, 'w', encoding="utf-8") as file:
+        #     for i in range(len(LogList)):
+        #         if i == len(LogList) - 1:
+        #             break
+        #         a =
 
     def merge_info(self):  # 合并EHPLOG中adasisApp、ehrizonApp、localizationApp的INFO文件
         map_name = self.var.get()
@@ -262,7 +272,7 @@ class HQFrame(Frame):
             if i.startswith("loc") and "INFO" in i and "Nebu" in i:
                 list_loc.append(i)
         # adasis_INFO.txt
-        ada_result = Desktop + "\\adasis_INFO.txt"
+        ada_result = Av2_Output + "\\adasis_INFO.txt"
         file = open(ada_result, 'w')
         for a in list_ada:
             path = folder + "\\" + a
@@ -271,7 +281,7 @@ class HQFrame(Frame):
             file.write("\n")
         file.close()
         # ehp_INFO.txt
-        ada_result = Desktop + "\\ehp_INFO.txt"
+        ada_result = Av2_Output + "\\ehp_INFO.txt"
         file = open(ada_result, 'w')
         for a in list_ehp:
             path = folder + "\\" + a
@@ -280,7 +290,7 @@ class HQFrame(Frame):
             file.write("\n")
         file.close()
         # localization_INFO.txt
-        ada_result = Desktop + "\\localization_INFO.txt"
+        ada_result = Av2_Output + "\\localization_INFO.txt"
         file = open(ada_result, 'w')
         for a in list_loc:
             path = folder + "\\" + a
@@ -292,9 +302,9 @@ class HQFrame(Frame):
 
         # 提取matchpt,gcj
         pattern = re.compile(r'matchpt,\d+\.\d+,\d+\.\d+')
-        path_mapmatch = Desktop + "\\localization_INFO.txt"
-        matchpt = Desktop + "\\matchpt.txt"
-        gcj = Desktop + "\\gcj1.txt"
+        path_mapmatch = Av2_Output + "\\localization_INFO.txt"
+        matchpt = Av2_Output + "\\matchpt.txt"
+        gcj = Av2_Output + "\\gcj1.txt"
         with open(path_mapmatch, 'r', encoding="utf-8") as f:
             match = f.readlines()
         with open(matchpt, 'w', encoding='utf-8') as f:
@@ -305,7 +315,7 @@ class HQFrame(Frame):
                     f.write(n[2:-2])
                     f.write('\n')
         pattern = re.compile(r'gcj1,\d+\.\d+,\d+\.\d+')
-        path_mapmatch = Desktop + "\\localization_INFO.txt"
+        path_mapmatch = Av2_Output + "\\localization_INFO.txt"
         with open(path_mapmatch, 'r', encoding="utf-8") as f:
             match = f.readlines()
         with open(gcj, 'w', encoding='utf-8') as f:
@@ -328,7 +338,8 @@ class HQFrame(Frame):
         # ----------------------------------------------------------------------------------------------
         Button(self, text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
         Button(self, text="删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=1)
-        Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
+        # 此按钮功能暂定
+        # Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
 
         Button(self, text="判断AvLog的Position的offset", command=self.JudgePosition).grid(row=3, column=0)
         Button(self, text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=1)
