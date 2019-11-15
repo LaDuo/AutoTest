@@ -1,4 +1,3 @@
-from tkinter import *
 from AutoTestView import *
 
 
@@ -34,3 +33,5 @@ class TestPage(object):
         self.RockyPage.pack()
         self.HQPage.pack_forget()
         self.WabcoPage.pack_forget()
+
+

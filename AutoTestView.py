@@ -147,13 +147,13 @@ class HQFrame(Frame):
         Avlog2 = os.listdir(Av2_Input)
         for i in Avlog2:
             if ".txt" in i:
-                path = os.path.join(base_path1, i)
+                path = os.path.join(Av2_Input, i)
                 os.remove(path)
-        Avlog3 = os.listdir(Av2_Output)
-        for i in Avlog3:
-            if ".txt" in i:
-                path = os.path.join(base_path1, i)
-                os.remove(path)
+        # Avlog3 = os.listdir(Av2_Output)
+        # for i in Avlog3:
+        #     if ".txt" in i:s
+        #         path = os.path.join(Av2_Output, i)
+        #         os.remove(path)
         showinfo(title="Delete AvLog", message="成功删除Av Log")
 
     def Sep_MSG(self):
@@ -187,6 +187,11 @@ class HQFrame(Frame):
         with open(prl2_path, 'w', encoding="utf-8") as file:
             for i in range(len(lists)):
                 a = pat_Pro_Long2.findall(lists[i])
+                if a:
+                    file.write(str(lists[i]))
+        with open(prl7_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = pat_Pro_Long7.findall(lists[i])
                 if a:
                     file.write(str(lists[i]))
         with open(prl9_path, 'w', encoding="utf-8") as file:
@@ -326,6 +331,9 @@ class HQFrame(Frame):
                     f.write(n[2:-2])
                     f.write('\n')
 
+    def CpData(self):
+        pass
+
     def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
         Label(self, text="This is HQ Page!").grid(row=0, column=1, columnspan=1)
@@ -346,6 +354,7 @@ class HQFrame(Frame):
         # =======================Ehp Log===========================
         Button(self, text="判断Stub是否发送", command=self.Send_Stub).grid(row=4, column=0)
         Button(self, text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=4, column=1)
+        Button(self, text="复制matchpt和gcj", command=self.CpData).grid(row=5, column=0)
 
 
 class WabcoFrame(Frame):

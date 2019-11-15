@@ -1,4 +1,3 @@
-from tkinter import Tk
 from TestPage import *
 
 main_window = Tk()  # 创建一个窗口对象
