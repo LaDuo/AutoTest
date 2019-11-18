@@ -149,11 +149,11 @@ class HQFrame(Frame):
             if ".txt" in i:
                 path = os.path.join(Av2_Input, i)
                 os.remove(path)
-        # Avlog3 = os.listdir(Av2_Output)
-        # for i in Avlog3:
-        #     if ".txt" in i:s
-        #         path = os.path.join(Av2_Output, i)
-        #         os.remove(path)
+        Avlog3 = os.listdir(Av2_Output)
+        for i in Avlog3:
+            if ".txt" in i:
+                path = os.path.join(Av2_Output, i)
+                os.remove(path)
         showinfo(title="Delete AvLog", message="成功删除Av Log")
 
     def Sep_MSG(self):
@@ -217,7 +217,19 @@ class HQFrame(Frame):
                     file.write(str(lists[i]))
                 elif b:
                     file.write(str(lists[i]))
+        with open(slope_path, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                a = av_slope_v.findall(lists[i])
+                b = short.findall(lists[i])
+                if a and b:
+                    file.write(str(lists[i]))
         showinfo(title="提取MSG", message="成功提取各个MSG！")
+
+    def ShowSlope(self):
+        ehp_result = Av2_Output + "\\ehp_INFO.txt"
+        with open(ehp_result, 'r', encoding="utf-8") as f:
+            tmp = f.readlines()
+
 
     def JudgePosition(self):
         with open(pos_path, 'r', encoding="utf-8") as file:
@@ -226,15 +238,10 @@ class HQFrame(Frame):
             if i == len(tmp) - 1:
                 break
             j = i + 1
-            # time = position.findall(tmp[i])
-            # speed1 = str(pattern_speed.findall(tmp[i]))
-            # speed2 = str(pattern_speed.findall(tmp[j]))
             ofs1 = str(pattern_ofs.findall(tmp[i]))
             ofs2 = str(pattern_ofs.findall(tmp[j]))
             path1 = str(pattern_path.findall(tmp[i]))
             path2 = str(pattern_path.findall(tmp[j]))
-            # speed1 = int(re.sub(r'\D', "", speed1))
-            # speed2 = int(re.sub(r'\D', "", speed2))
             ofs1 = int(re.sub(r'\D', "", ofs1))
             ofs2 = int(re.sub(r'\D', "", ofs2))
             path1 = int(re.sub(r'\D', "", path1))
@@ -255,7 +262,7 @@ class HQFrame(Frame):
         showinfo(title="判断", message="判断完成！")
 
     def Send_Stub(self):
-        pass
+        showinfo("YES!", message="未开发")
         # with open(Av2_log, 'r', encoding='utf-8') as f:
         #     LogList = f.readlines()
         # with open(Err_Stub, 'w', encoding="utf-8") as file:
@@ -277,17 +284,17 @@ class HQFrame(Frame):
             if i.startswith("loc") and "INFO" in i and "Nebu" in i:
                 list_loc.append(i)
         # adasis_INFO.txt
-        ada_result = Av2_Output + "\\adasis_INFO.txt"
-        file = open(ada_result, 'w')
-        for a in list_ada:
-            path = folder + "\\" + a
-            for line in open(path):
-                file.write(line)
-            file.write("\n")
-        file.close()
+        # ada_result = Av2_Output + "\\adasis_INFO.txt"
+        # file = open(ada_result, 'w')
+        # for a in list_ada:
+        #     path = folder + "\\" + a
+        #     for line in open(path):
+        #         file.write(line)
+        #     file.write("\n")
+        # file.close()
         # ehp_INFO.txt
-        ada_result = Av2_Output + "\\ehp_INFO.txt"
-        file = open(ada_result, 'w')
+        ehp_result = Av2_Output + "\\ehp_INFO.txt"
+        file = open(ehp_result, 'w')
         for a in list_ehp:
             path = folder + "\\" + a
             for line in open(path):
@@ -295,15 +302,15 @@ class HQFrame(Frame):
             file.write("\n")
         file.close()
         # localization_INFO.txt
-        ada_result = Av2_Output + "\\localization_INFO.txt"
-        file = open(ada_result, 'w')
+        loc_result = Av2_Output + "\\localization_INFO.txt"
+        file = open(loc_result, 'w')
         for a in list_loc:
             path = folder + "\\" + a
             for line in open(path):
                 file.write(line)
             file.write("\n")
         file.close()
-        print("merger over")
+        showinfo("merger over")
 
         # 提取matchpt,gcj
         pattern = re.compile(r'matchpt,\d+\.\d+,\d+\.\d+')
@@ -330,9 +337,11 @@ class HQFrame(Frame):
                     n = str(m)
                     f.write(n[2:-2])
                     f.write('\n')
+        path_slope = Av2_Output + "\\slope.txt"
+
 
     def CpData(self):
-        pass
+        showinfo("YES!", message="未开发")
 
     def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
@@ -342,19 +351,21 @@ class HQFrame(Frame):
         Label(self, text="请输入回放的路线名：").grid(row=1, column=0)
         self.map_names = Entry(self, textvariable=self.var)
         self.map_names.grid(row=1, column=1)
-        Button(self, text="创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=2)
+        Button(self, width="20", height="1", text="START:创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=2)
         # ----------------------------------------------------------------------------------------------
-        Button(self, text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
-        Button(self, text="删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=1)
+        Button(self, width="20", height="1", text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
+        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=10, column=5)
         # 此按钮功能暂定
         # Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
-
-        Button(self, text="判断AvLog的Position的offset", command=self.JudgePosition).grid(row=3, column=0)
-        Button(self, text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=1)
+        # 判断Av Log中的position消息的offset
+        Listbox(self, width="20").grid(row=5, column=0)
+        Button(self, width="20", height="1", text="显示Slope", command=self.ShowSlope).grid(row=5, column=1)
+        Button(self, width="20", height="1", text="判断Position的offset", command=self.JudgePosition).grid(row=4, column=0)
+        Button(self, width="20", height="1", text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=0)
         # =======================Ehp Log===========================
-        Button(self, text="判断Stub是否发送", command=self.Send_Stub).grid(row=4, column=0)
-        Button(self, text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=4, column=1)
-        Button(self, text="复制matchpt和gcj", command=self.CpData).grid(row=5, column=0)
+        Button(self, width="20", height="1", text="判断Stub是否发送", command=self.Send_Stub).grid(row=3, column=1)
+        Button(self, width="20", height="1", text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=4, column=1)
+        Button(self, width="20", height="1", text="复制matchpt和gcj", command=self.CpData).grid(row=2, column=1)
 
 
 class WabcoFrame(Frame):

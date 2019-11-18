@@ -33,15 +33,17 @@ prl9_path = Desktop + "\\Av2_Output\\prl9.txt"
 prs1_path = Desktop + "\\Av2_Output\\prs1.txt"
 prs4_path = Desktop + "\\Av2_Output\\prs4.txt"
 pos_stub_path = Desktop + "\\Av2_Output\\pos_stub.txt"
+slope_path = Av2_Output + "\\slope.txt"
 gcj_Inspector = "D:\\test\\old_dateBase\\DatabaseInspector\\gcj.csv"
 match_Inspector = "D:\\test\\old_dateBase\\DatabaseInspector\\match.csv"
-
 
 list_ehp = []
 list_ada = []
 list_loc = []
 Err = []
 listtt = []
+
+list_items = [1, 2, 3, 4]
 
 time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
 pattern_ofs = re.compile(r'ofs=\d+,')
@@ -57,9 +59,12 @@ pat_Pro_Long7 = re.compile(r'Profile Long: type=7')
 pat_Pro_Long9 = re.compile(r'Profile Long: type=9')
 pat_Pro_Sht1 = re.compile(r'Profile Short: type=1')
 pat_Pro_Sht4 = re.compile(r'Profile Short: type=4')
-
 pat_Meta = re.compile(r'Metadata')
 pat_Seg = re.compile(r'Segment: ')
 pat_time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
 po = re.compile(r'path=\d+')
-
+short = re.compile(r'Profile Short: type=4')
+av_slope_v = re.compile(r'value=\d+')
+av_slope_v1 = re.compile(r'value1=\d+')
+eh_slope_v = re.compile(r'v0:\s\d+')
+eh_slope_v1 = re.compile(r'v1:\s\d+')
