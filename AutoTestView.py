@@ -226,40 +226,59 @@ class HQFrame(Frame):
         showinfo(title="提取MSG", message="成功提取各个MSG！")
 
     def ShowSlope(self):
-        ehp_result = Av2_Output + "\\ehp_INFO.txt"
+        ehp_result = Av2_Output + "\\prs4.txt"
         with open(ehp_result, 'r', encoding="utf-8") as f:
             tmp = f.readlines()
+        slope_model = self.text.get(1.0, 2.0)
+        if slope_model != "1" and slope_model != "2":
+            showinfo(title="Error", message="未选择发送模式")
+        if slope_model == "1":
+            for i in range(len(tmp)):
+                if i == len(tmp) - 1:
+                    break
+                n1 = eh_slope_v.findall(tmp[i])
+                str1 = str(n1)
 
+        elif slope_model == "2":
+            for i in range(len(tmp)):
+                if i == len(tmp) - 1:
+                    break
 
     def JudgePosition(self):
-        with open(pos_path, 'r', encoding="utf-8") as file:
-            tmp = file.readlines()
-        for i in range(len(tmp)):
-            if i == len(tmp) - 1:
-                break
-            j = i + 1
-            ofs1 = str(pattern_ofs.findall(tmp[i]))
-            ofs2 = str(pattern_ofs.findall(tmp[j]))
-            path1 = str(pattern_path.findall(tmp[i]))
-            path2 = str(pattern_path.findall(tmp[j]))
-            ofs1 = int(re.sub(r'\D', "", ofs1))
-            ofs2 = int(re.sub(r'\D', "", ofs2))
-            path1 = int(re.sub(r'\D', "", path1))
-            path2 = int(re.sub(r'\D', "", path2))
-            # 相同path id情况下，offset递增，反之打印（忽略path id不同的情况）
-            if path1 == 0:
-                continue
-            if (path1 == path2) and (ofs2 >= ofs1):
-                continue
-            elif (path1 == path2) and (ofs2 < ofs1):
-                Err.append(str(tmp[i]))
-                Err.append(str(tmp[j]))
-                Err.append('\n')
-        with open(Err_Position, 'w', encoding="utf-8") as file:
-            for i in range(len(Err)):
-                file.write(str(Err[i]))
-                file.write("\n")
-        showinfo(title="判断", message="判断完成！")
+        flag = 0
+        try:
+            with open(pos_path, 'r', encoding="utf-8") as file:
+                tmp = file.readlines()
+            flag = 1
+        except FileNotFoundError:
+            showwarning(title="Warning", message=" <pos.txt>  File not found")
+        if flag == 1:
+            for i in range(len(tmp)):
+                if i == len(tmp) - 1:
+                    break
+                j = i + 1
+                ofs1 = str(pattern_ofs.findall(tmp[i]))
+                ofs2 = str(pattern_ofs.findall(tmp[j]))
+                path1 = str(pattern_path.findall(tmp[i]))
+                path2 = str(pattern_path.findall(tmp[j]))
+                ofs1 = int(re.sub(r'\D', "", ofs1))
+                ofs2 = int(re.sub(r'\D', "", ofs2))
+                path1 = int(re.sub(r'\D', "", path1))
+                path2 = int(re.sub(r'\D', "", path2))
+                # 相同path id情况下，offset递增，反之打印（忽略path id不同的情况）
+                if path1 == 0:
+                    continue
+                if (path1 == path2) and (ofs2 >= ofs1):
+                    continue
+                elif (path1 == path2) and (ofs2 < ofs1):
+                    Err.append(str(tmp[i]))
+                    Err.append(str(tmp[j]))
+                    Err.append('\n')
+            with open(Err_Position, 'w', encoding="utf-8") as file:
+                for i in range(len(Err)):
+                    file.write(str(Err[i]))
+                    file.write("\n")
+            showinfo(title="判断", message="判断完成！")
 
     def Send_Stub(self):
         showinfo("YES!", message="未开发")
@@ -269,7 +288,6 @@ class HQFrame(Frame):
         #     for i in range(len(LogList)):
         #         if i == len(LogList) - 1:
         #             break
-        #         a =
 
     def merge_info(self):  # 合并EHPLOG中adasisApp、ehrizonApp、localizationApp的INFO文件
         map_name = self.var.get()
@@ -339,7 +357,89 @@ class HQFrame(Frame):
                     f.write('\n')
         path_slope = Av2_Output + "\\slope.txt"
 
+    def BANDWIDTH(self):
+        self.text.delete(1.0, 2.0)
+        model = 2
+        self.text.insert(END, model)
 
+    def ROBUSTNSS(self):
+        self.text.delete(1.0, 2.0)
+        model = 3
+        self.text.insert(END, model)
+
+    def clear(self):
+        clr = os.listdir(Analyze)
+        Date = time.strftime("%Y-%m-%d", time.localtime())
+        year = Date[0:4]
+        month = int(Date[5:7])
+        for i in clr:
+            # i_month = int(i[5:7])
+            if i.startswith("ALL"):
+                continue
+            i_month = i[5:7]
+            i_month = int(i_month)
+            if i.startswith(year):
+                if month - i_month >= 2:
+                    shutil.rmtree(Analyze + "\\" + i)
+            else:
+                shutil.rmtree(Analyze + "\\" + i)
+
+    def JudgeStub(self):
+        flag = 0
+        lir2 = []
+        try:
+            with open(stub_path, 'r', encoding="utf-8") as file:
+                lir = file.readlines()
+            flag = 1
+        except FileNotFoundError:
+            showerror(title="Warning!", message=" <stub.txt> File not found")
+        if flag == 1:
+            for i in range(len(lir)):
+                if i == len(lir) - 1:
+                    break
+                j = i + 1
+                id1 = stub_path_id.findall(lir[i])
+                id2 = stub_path_id.findall(lir[j])
+                ofs1 = str(stub_offset.findall(lir[i]))
+                ofs2 = str(stub_offset.findall(lir[j]))
+                ofs1 = int(re.sub(r'\D', "", ofs1))
+                ofs2 = int(re.sub(r'\D', "", ofs2))
+                last1 = stub_last.findall(lir[i])
+                last2 = stub_last.findall(lir[j])
+                if id1 == id2:
+                    if ofs1 == ofs2:
+                        if last1 == "true":
+                            lir2.append("last1==true -->" + lir[i])
+                            lir2.append("last1==true -->" + lir[j])
+                    elif ofs1 < ofs2:
+                        if last1 == "false":
+                            lir2.append("last1==false-->" + lir[i])
+                            lir2.append("last1==false-->" + lir[j])
+                    else:
+                        if ofs1 >= 7000:
+                            continue
+                        else:
+                            lir2.append("ofs1 > ofs2 -->" + lir[i])
+                            lir2.append("ofs1 > ofs2 -->" + lir[j])
+            count = 0
+            # 每组问题
+            with open(Err_Stub, 'w', encoding="utf-8") as f:
+                for n in range(len(lir2)):
+                    f.write(lir2[n])
+                    count += 1
+                    if count == 2:
+                        count = 0
+                        f.write("======================\n")
+
+    def JudgeSegment(self):
+        flag = 0
+        try:
+            with open(seg_path, 'r', encoding="utf-8") as f:
+                lir = f.readlines()
+                flag = 1
+        except FileNotFoundError:
+            showerror(title="Warning!", message=" <seg.txt> File not found")
+            flag = 0
     def CpData(self):
         showinfo("YES!", message="未开发")
 
@@ -354,18 +454,24 @@ class HQFrame(Frame):
         Button(self, width="20", height="1", text="START:创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=2)
         # ----------------------------------------------------------------------------------------------
         Button(self, width="20", height="1", text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
-        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=10, column=5)
+        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=1, column=5)
         # 此按钮功能暂定
         # Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
         # 判断Av Log中的position消息的offset
-        Listbox(self, width="20").grid(row=5, column=0)
-        Button(self, width="20", height="1", text="显示Slope", command=self.ShowSlope).grid(row=5, column=1)
+        self.text = Text(self, width="10", height="1")
+        self.text.grid(row=5, column=0)
+        Button(self, width="15", height="1", text="BANDWIDTH", command=self.BANDWIDTH).grid(row=5, column=1)
+        Button(self, width="15", height="1", text="ROBUSTNESS", command=self.ROBUSTNSS).grid(row=5, column=2)
+        Button(self, width="20", height="1", text="显示Slope", command=self.ShowSlope).grid(row=5, column=3)
         Button(self, width="20", height="1", text="判断Position的offset", command=self.JudgePosition).grid(row=4, column=0)
         Button(self, width="20", height="1", text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=0)
         # =======================Ehp Log===========================
         Button(self, width="20", height="1", text="判断Stub是否发送", command=self.Send_Stub).grid(row=3, column=1)
         Button(self, width="20", height="1", text="EHPLOG_INFO_Merge", command=self.merge_info).grid(row=4, column=1)
         Button(self, width="20", height="1", text="复制matchpt和gcj", command=self.CpData).grid(row=2, column=1)
+        Button(self, width="20", height="1", text="清空上上个月的log", command=self.clear).grid(row=6, column=0)
+        Button(self, width="20", height="1", text="stub_offset是否递增", command=self.JudgeStub).grid(row=6, column=1)
+        Button(self, width="20", height="1", text="segment消息检测", command=self.JudgeSegment).grid(row=6, column=2)
 
 
 class WabcoFrame(Frame):

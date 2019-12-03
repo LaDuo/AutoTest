@@ -1,5 +1,6 @@
 import re
 import os
+import time
 import clr
 import PySimpleGUI as sg
 import shutil
@@ -18,10 +19,11 @@ Analyze = Desktop + "\\Analyze"
 base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径     重点关注   Av2数据路径需要根据电脑配置更改
 # --------------------------------------------------------
 
+global model
+
 Err_Position = Av2_Output + "\\Err_Pos.txt"  # 打印Av2Log中的Position的offset异常
 Err_Stub = Av2_Output + "\\Err_Stub.txt"
 stub_position = Av2_Output + "\\sub&position.txt"
-
 stub_path = Desktop + "\\Av2_Output\\stub.txt"
 meta_path = Desktop + "\\Av2_Output\\meta.txt"
 seg_path = Desktop + "\\Av2_Output\\seg.txt"
@@ -45,7 +47,7 @@ listtt = []
 
 list_items = [1, 2, 3, 4]
 
-time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
+pattern_time = re.compile(r'\d+-\d+ \d+:\d+:\d+\.\d+')
 pattern_ofs = re.compile(r'ofs=\d+,')
 pattern_path = re.compile(r'path=\d+,')
 pattern_speed = re.compile(r'speed=\d+,')
@@ -66,5 +68,10 @@ po = re.compile(r'path=\d+')
 short = re.compile(r'Profile Short: type=4')
 av_slope_v = re.compile(r'value=\d+')
 av_slope_v1 = re.compile(r'value1=\d+')
-eh_slope_v = re.compile(r'v0:\s\d+')
-eh_slope_v1 = re.compile(r'v1:\s\d+')
+eh_slope_v = re.compile(r'v0:\s\d{3}')
+eh_slope_v1 = re.compile(r'v1:\s\d{3}')
+
+# stub message RE
+stub_path_id = re.compile(r'path=\d+')
+stub_offset = re.compile(r'ofs=\d+')
+stub_last = re.compile(r'isLastStubAtOffset=\w+')
