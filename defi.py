@@ -1,8 +1,10 @@
 import re
 import os
 import time
+import requests
 import clr
 import PySimpleGUI as sg
+from influxdb import InfluxDBClient
 import shutil
 import zipfile
 from datetime import datetime
@@ -18,11 +20,11 @@ Analyze = Desktop + "\\Analyze"
 # --------------------------------------------------------
 base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径     重点关注   Av2数据路径需要根据电脑配置更改
 # --------------------------------------------------------
-
 global model
 
 Err_Position = Av2_Output + "\\Err_Pos.txt"  # 打印Av2Log中的Position的offset异常
 Err_Stub = Av2_Output + "\\Err_Stub.txt"
+Err_Segment = Av2_Output + "\\Err_Segment.txt"
 stub_position = Av2_Output + "\\sub&position.txt"
 stub_path = Desktop + "\\Av2_Output\\stub.txt"
 meta_path = Desktop + "\\Av2_Output\\meta.txt"
@@ -75,3 +77,13 @@ eh_slope_v1 = re.compile(r'v1:\s\d{3}')
 stub_path_id = re.compile(r'path=\d+')
 stub_offset = re.compile(r'ofs=\d+')
 stub_last = re.compile(r'isLastStubAtOffset=\w+')
+offroad = "['Position: path=2']"
+
+# segment message RE
+seg_path_id = re.compile(r'path=\d+')
+seg_offset = re.compile(r'ofs=\d+')
+seg_bridge = re.compile(r'isBridge=av2_true')
+seg_cyclic = re.compile(r'cyclic=\d')
+
+# InfluxDB
+data_route = "D:\\test\\InfluxDBdata"

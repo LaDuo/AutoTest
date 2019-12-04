@@ -230,16 +230,18 @@ class HQFrame(Frame):
         with open(ehp_result, 'r', encoding="utf-8") as f:
             tmp = f.readlines()
         slope_model = self.text.get(1.0, 2.0)
-        if slope_model != "1" and slope_model != "2":
+        if slope_model == "\n":
             showinfo(title="Error", message="未选择发送模式")
-        if slope_model == "1":
+        if slope_model == "2\n":
+            print(slope_model, "= 2")
             for i in range(len(tmp)):
                 if i == len(tmp) - 1:
                     break
                 n1 = eh_slope_v.findall(tmp[i])
                 str1 = str(n1)
 
-        elif slope_model == "2":
+        elif slope_model == "3\n":
+            print(slope_model, "= 3")
             for i in range(len(tmp)):
                 if i == len(tmp) - 1:
                     break
@@ -281,13 +283,26 @@ class HQFrame(Frame):
             showinfo(title="判断", message="判断完成！")
 
     def Send_Stub(self):
-        showinfo("YES!", message="未开发")
-        # with open(Av2_log, 'r', encoding='utf-8') as f:
-        #     LogList = f.readlines()
-        # with open(Err_Stub, 'w', encoding="utf-8") as file:
-        #     for i in range(len(LogList)):
-        #         if i == len(LogList) - 1:
-        #             break
+        with open(pos_stub_path, 'r', encoding='utf-8') as f:
+            LogList = f.readlines()
+        with open(Err_Stub, 'w', encoding="utf-8") as file:
+            for i in range(len(LogList)):
+                if i == len(LogList) - 2:
+                    break
+                j = i + 2
+                k = i + 1
+                # print("j = ", j, "k = ", k)
+                pos1 = str(pat_Pos.findall(LogList[i]))
+                pos2 = str(pat_Pos.findall(LogList[j]))
+                stub = str(pat_stub.findall(LogList[k]))
+                # print(type(pos1), type(offroad))
+                if pos1 != "[]" and pos2 != "[]" and pos1 != offroad and pos1 != pos2:
+                    print("pos1 != pos2")
+                    if stub == "[]":
+                        file.write(LogList[k])
+                        file.write("\n")
+
+        showinfo(title="Detect Stub MSG", message="检测完成")
 
     def merge_info(self):  # 合并EHPLOG中adasisApp、ehrizonApp、localizationApp的INFO文件
         map_name = self.var.get()
@@ -355,16 +370,15 @@ class HQFrame(Frame):
                     n = str(m)
                     f.write(n[2:-2])
                     f.write('\n')
-        path_slope = Av2_Output + "\\slope.txt"
 
-    def BANDWIDTH(self):
+    def BANDWIDTH(self):  # model为conf/ehorizon/ehorizon_conf.pb.txt中的profile_short_value_mode的配置
         self.text.delete(1.0, 2.0)
-        model = 2
+        model = 3  # model=3 表示BANDWIDTH模式，即 一次发送两个
         self.text.insert(END, model)
 
     def ROBUSTNSS(self):
         self.text.delete(1.0, 2.0)
-        model = 3
+        model = 2  # model=2 表示ROBUSTNSS模式，即 备份发送
         self.text.insert(END, model)
 
     def clear(self):
@@ -433,6 +447,9 @@ class HQFrame(Frame):
 
     def JudgeSegment(self):
         flag = 0
+        lir2 = []
+        cyc = []
+        bri = []
         try:
             with open(seg_path, 'r', encoding="utf-8") as f:
                 lir = f.readlines()
@@ -440,6 +457,75 @@ class HQFrame(Frame):
         except FileNotFoundError:
             showerror(title="Warning!", message=" <seg.txt> File not found")
             flag = 0
+        if flag == 1:
+            for i in range(len(lir)):
+                if i == len(lir) - 1:
+                    break
+                j = i + 1
+                id1 = seg_path_id.findall(lir[i])
+                id2 = seg_path_id.findall(lir[j])
+                ofs1 = str(seg_offset.findall(lir[i]))
+                ofs2 = str(seg_offset.findall(lir[j]))
+                ofs1 = int(re.sub(r'\D', "", ofs1))
+                ofs2 = int(re.sub(r'\D', "", ofs2))
+                bridge = seg_bridge.findall(lir[i])
+                cyclic1 = str(seg_cyclic.findall(lir[i]))
+                cyclic1 = int(re.sub(r'\D', "", cyclic1))
+                cyclic2 = str(seg_cyclic.findall(lir[j]))
+                cyclic2 = int(re.sub(r'\D', "", cyclic2))
+                if bridge:
+                    bri.append(lir[i])
+                if id1 == id2:
+                    if ofs2 < ofs1:
+                        lir2.append(lir[i])
+                if cyclic1 == 0:
+                    if cyclic2 != 1:
+                        cyc.append(lir[j])
+
+                if cyclic1 == 1:
+                    if cyclic2 != 2:
+                        cyc.append(lir[j])
+
+                if cyclic1 == 2:
+                    if cyclic2 != 3:
+                        cyc.append(lir[j])
+
+                if cyclic1 == 3:
+                    if cyclic2 != 0:
+                        cyc.append(lir[j])
+
+            count = 0
+            # 每组问题
+            with open(Err_Segment, 'w', encoding="utf-8") as f:
+                for n in range(len(lir2)):
+                    f.write(lir2[n])
+                    count += 1
+                    if count == 2:
+                        count = 0
+                        f.write("======================\n")
+
+    def GetCpu(self):
+        flag = 0
+        try:
+            client = InfluxDBClient(host="127.0.0.1", port=8086)
+            flag = 1
+        except ConnectionRefusedError:
+            showerror(title="ConnectionError", message="数据库连接失败！")
+            flag = 0
+        if flag == 1:
+            usr_cpu = client.query('select value from "processes_user" limit 1000', database="collectd")
+            ker_cpu = client.query('select * from "processes_syst" limit 1000', database="collectd")
+            phy_mem = client.query('select * from "processes_value" limit 1000', database="collectd")
+            sys_mem = client.query('select * from "memory_value" limit 1000', database="collectd")
+            free_cpu = client.query('select * from "cpu_value" limit 1000', database="collectd")
+
+            # print("Result: {0}".format(usr_cpu))
+            showinfo(title="未完成", message="开发中")
+            # with open(data_route+"\\cpu.txt", 'w', encoding="utf-8") as f:
+            #     f.write("Result: {0}".format(usr_cpu))
+            # with open(data_route+"\\memory.txt", 'w', encoding="utf-8") as f:
+            #     f.write("Result: {0}".format(ker_cpu))
+
     def CpData(self):
         showinfo("YES!", message="未开发")
 
@@ -472,6 +558,7 @@ class HQFrame(Frame):
         Button(self, width="20", height="1", text="清空上上个月的log", command=self.clear).grid(row=6, column=0)
         Button(self, width="20", height="1", text="stub_offset是否递增", command=self.JudgeStub).grid(row=6, column=1)
         Button(self, width="20", height="1", text="segment消息检测", command=self.JudgeSegment).grid(row=6, column=2)
+        Button(self, width="20", height="1", text="提取性能数据", command=self.GetCpu).grid(row=7, column=0)
 
 
 class WabcoFrame(Frame):
