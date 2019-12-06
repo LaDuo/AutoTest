@@ -1,5 +1,6 @@
 import re
 import os
+import threading
 import time
 import requests
 import clr
@@ -7,6 +8,7 @@ import PySimpleGUI as sg
 from influxdb import InfluxDBClient
 import shutil
 import zipfile
+import matplotlib.pyplot as plt
 from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
 from tkinter.messagebox import *
@@ -22,22 +24,26 @@ base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径     重点关�
 # --------------------------------------------------------
 global model
 
-Err_Position = Av2_Output + "\\Err_Pos.txt"  # 打印Av2Log中的Position的offset异常
-Err_Stub = Av2_Output + "\\Err_Stub.txt"
-Err_Segment = Av2_Output + "\\Err_Segment.txt"
-stub_position = Av2_Output + "\\sub&position.txt"
-stub_path = Desktop + "\\Av2_Output\\stub.txt"
-meta_path = Desktop + "\\Av2_Output\\meta.txt"
-seg_path = Desktop + "\\Av2_Output\\seg.txt"
-pos_path = Desktop + "\\Av2_Output\\pos.txt"
-prl1_path = Desktop + "\\Av2_Output\\prl1.txt"
-prl2_path = Desktop + "\\Av2_Output\\prl2.txt"
-prl7_path = Desktop + "\\Av2_Output\\prl7.txt"
-prl9_path = Desktop + "\\Av2_Output\\prl9.txt"
-prs1_path = Desktop + "\\Av2_Output\\prs1.txt"
-prs4_path = Desktop + "\\Av2_Output\\prs4.txt"
-pos_stub_path = Desktop + "\\Av2_Output\\pos_stub.txt"
-slope_path = Av2_Output + "\\slope.txt"
+with open(Av2_log, 'r', encoding="utf-8") as file:
+    lists = file.readlines()
+
+Err_Position = os.path.join(Av2_Output, "Err_Pos.txt")  # 打印Av2Log中的Position的offset异常
+Err_Stub_ofs = os.path.join(Av2_Output, "Err_Stub_ofs.txt")
+Err_Stub_send = os.path.join(Av2_Output, "Err_Stub_send.txt")
+Err_Segment = os.path.join(Av2_Output, "Err_Segment.txt")
+stub_position = os.path.join(Av2_Output, "sub&position.txt")
+stub_path = os.path.join(Av2_Output, "stub.txt")
+meta_path = os.path.join(Av2_Output, "meta.txt")
+seg_path = os.path.join(Av2_Output, "seg.txt")
+pos_path = os.path.join(Av2_Output, "pos.txt")
+prl1_path = os.path.join(Av2_Output, "prl1.txt")
+prl2_path = os.path.join(Av2_Output, "prl2.txt")
+prl7_path = os.path.join(Av2_Output, "prl7.txt")
+prl9_path = os.path.join(Av2_Output, "prl9.txt")
+prs1_path = os.path.join(Av2_Output, "prs1.txt")
+prs4_path = os.path.join(Av2_Output, "prs4.txt")
+pos_stub_path = os.path.join(Av2_Output, "pos_stub.txt")
+slope_path = os.path.join(Av2_Output, "slope.txt")
 gcj_Inspector = "D:\\test\\old_dateBase\\DatabaseInspector\\gcj.csv"
 match_Inspector = "D:\\test\\old_dateBase\\DatabaseInspector\\match.csv"
 
@@ -87,3 +93,11 @@ seg_cyclic = re.compile(r'cyclic=\d')
 
 # InfluxDB
 data_route = "D:\\test\\InfluxDBdata"
+
+# profile short slope
+slope_path_id = re.compile(r'path=\d+')
+slope_value = re.compile(r'value=\d+')
+slope_value1 = re.compile(r'value1=\d+')
+slope_cyc = re.compile(r'cyclic=\d')
+slope_ofs = re.compile(r'offs=\d+')
+slope_dis = re.compile(r'distance1=\d+')

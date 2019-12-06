@@ -1,5 +1,4 @@
 from tkinter import *
-
 from defi import *
 
 
@@ -10,6 +9,7 @@ class HQFrame(Frame):
         self.map_names = None
         self.var = StringVar()
         self.createPage()
+
 
     def AvLog(self):  # 将桌面上的Av2_Input文件夹中的Av2 Log合并放置在Av2_Output文件夹中的outfile.txt中
         files = os.listdir(Av2_Input)
@@ -31,9 +31,6 @@ class HQFrame(Frame):
     def CreateMoveMerge(self):
         # 创建根目录
         map_name = self.var.get()
-        # 等待添加功能，在点击创建文件时，判断用户输入是否为空，若为空，则提示"输入为空，请输入回放路线！"
-
-        # if
         try:
             if not os.path.exists(Analyze):
                 os.mkdir(Analyze)
@@ -139,11 +136,11 @@ class HQFrame(Frame):
         showinfo(title="Create Move Download Merge", message="Success！")
 
     def DeleteAvLog(self):
-        Avlog1 = os.listdir(base_path1)
-        for i in Avlog1:
-            if ".txt" in i:
-                path = os.path.join(base_path1, i)
-                os.remove(path)
+        # Avlog1 = os.listdir(base_path1)
+        # for i in Avlog1:
+        #     if ".txt" in i:
+        #         path = os.path.join(base_path1, i)
+        #         os.remove(path)
         Avlog2 = os.listdir(Av2_Input)
         for i in Avlog2:
             if ".txt" in i:
@@ -157,58 +154,33 @@ class HQFrame(Frame):
         showinfo(title="Delete AvLog", message="成功删除Av Log")
 
     def Sep_MSG(self):
-        with open(Av2_log, 'r', encoding="utf-8") as f1:
-            lists = f1.readlines()
-        with open(stub_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Stub.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(pos_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pos.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(meta_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Meta.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(seg_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Seg.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prl1_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Long1.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prl2_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Long2.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prl7_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Long7.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prl9_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Long9.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prs1_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Sht1.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
-        with open(prs4_path, 'w', encoding="utf-8") as file:
-            for i in range(len(lists)):
-                a = pat_Pro_Sht4.findall(lists[i])
-                if a:
-                    file.write(str(lists[i]))
+        # stub msg
+        t1 = threading.Thread(target=HQFrame.action, args=(self, stub_path, pat_Stub))
+        t1.start()
+        # position msg
+        t2 = threading.Thread(target=HQFrame.action, args=(self, pos_path, pat_Pos))
+        t2.start()
+        # segment msg
+        t3 = threading.Thread(target=HQFrame.action, args=(self, seg_path, pat_Seg))
+        t3.start()
+        # profile long type 1
+        t4 = threading.Thread(target=HQFrame.action, args=(self, prl1_path, pat_Pro_Long1))
+        t4.start()
+        # profile long type 2
+        t5 = threading.Thread(target=HQFrame.action, args=(self, prl2_path, pat_Pro_Long2))
+        t5.start()
+        # profile long type 9
+        t6 = threading.Thread(target=HQFrame.action, args=(self, prl9_path, pat_Pro_Long9))
+        t6.start()
+        # profile short type 1
+        t7 = threading.Thread(target=HQFrame.action, args=(self, prs1_path, pat_Pro_Sht1))
+        t7.start()
+        # profile short type 4
+        t8 = threading.Thread(target=HQFrame.action, args=(self, prs4_path, pat_Pro_Sht4))
+        t8.start()
+        # Metadata
+        t9 = threading.Thread(target=HQFrame.action, args=(self, meta_path, pat_Meta))
+        t9.start()
         with open(pos_stub_path, 'w', encoding="utf-8") as file:
             for i in range(len(lists)):
                 a = pat_stub.findall(lists[i])
@@ -225,6 +197,74 @@ class HQFrame(Frame):
                     file.write(str(lists[i]))
         showinfo(title="提取MSG", message="成功提取各个MSG！")
 
+    def action(self, route, pat,):
+        pats = re.compile(pat)
+        with open(route, 'w', encoding="utf-8") as file:
+            for i in range(len(lists)):
+                n = pats.findall(lists[i])
+                if n:
+                    file.write(lists[i])
+
+    def draw_slope(self, path_id, value_list=[], ofs_list=[]):
+        plt.clf()
+        plt.plot(ofs_list, value_list)
+        plt.title(path_id)
+        plt.show()
+
+    # 备份发送
+    def ROBUSTNSS_(self):
+        with open(slope_path, 'r', encoding="utf-8") as f:
+            lir = f.readlines()
+        lir_value = []
+        lir_ofs = []
+        for i in range(len(lir)):
+            if i == len(lir) - 1:
+                break
+            j = i + 1
+            value = str(slope_value.findall(lir[i]))
+            value = int(re.sub(r'\D', "", value))
+            offset = str(slope_ofs.findall(lir[i]))
+            offset = int(re.sub(r'\D', "", offset))
+            path1 = str(slope_path_id.findall(lir[i]))
+            path2 = str(slope_path_id.findall(lir[j]))
+            path1 = int(re.sub(r'\D', "", path1))
+            path2 = int(re.sub(r'\D', "", path2))
+            if value:
+                lir_value.append(value)
+                lir_ofs.append(offset)
+            if path1 != path2:
+                self.draw_slope(path1, lir_value, lir_ofs)
+                lir_value = []
+                lir_ofs = []
+
+    # 一次发送两个
+    def BANDWIDTH_(self):
+        with open(slope_path, 'r', encoding="utf-8") as f:
+            lir = f.readlines()
+        lir_value = []
+        lir_ofs = []
+        for i in range(len(lir)):
+            if i == len(lir) - 1:
+                break
+            j = i + 1
+            value = str(slope_value.findall(lir[i]))
+            value1 = str(slope_value1.findall(lir[i]))
+            value = int(re.sub(r'\D', "", value))
+            value1 = int(re.sub(r'\D', "", value1)[1:])
+            offset = str(slope_ofs.findall(lir[i]))
+            offset = int(re.sub(r'\D', "", offset))
+            path1 = str(slope_path_id.findall(lir[i]))
+            path2 = str(slope_path_id.findall(lir[j]))
+            path1 = int(re.sub(r'\D', "", path1))
+            path2 = int(re.sub(r'\D', "", path2))
+            lir_value.append(value)
+            lir_value.append(value1)
+            lir_ofs.append(offset)
+            if path1 != path2:
+                self.draw_slope(path1, lir_value, lir_ofs)
+                lir_value = []
+                lir_ofs = []
+
     def ShowSlope(self):
         ehp_result = Av2_Output + "\\prs4.txt"
         with open(ehp_result, 'r', encoding="utf-8") as f:
@@ -233,18 +273,9 @@ class HQFrame(Frame):
         if slope_model == "\n":
             showinfo(title="Error", message="未选择发送模式")
         if slope_model == "2\n":
-            print(slope_model, "= 2")
-            for i in range(len(tmp)):
-                if i == len(tmp) - 1:
-                    break
-                n1 = eh_slope_v.findall(tmp[i])
-                str1 = str(n1)
-
+            self.ROBUSTNSS_()
         elif slope_model == "3\n":
-            print(slope_model, "= 3")
-            for i in range(len(tmp)):
-                if i == len(tmp) - 1:
-                    break
+            self.BANDWIDTH_()
 
     def JudgePosition(self):
         flag = 0
@@ -282,10 +313,11 @@ class HQFrame(Frame):
                     file.write("\n")
             showinfo(title="判断", message="判断完成！")
 
+    # 重构时是否发送stub
     def Send_Stub(self):
         with open(pos_stub_path, 'r', encoding='utf-8') as f:
             LogList = f.readlines()
-        with open(Err_Stub, 'w', encoding="utf-8") as file:
+        with open(Err_Stub_send, 'w', encoding="utf-8") as file:
             for i in range(len(LogList)):
                 if i == len(LogList) - 2:
                     break
@@ -297,7 +329,6 @@ class HQFrame(Frame):
                 stub = str(pat_stub.findall(LogList[k]))
                 # print(type(pos1), type(offroad))
                 if pos1 != "[]" and pos2 != "[]" and pos1 != offroad and pos1 != pos2:
-                    print("pos1 != pos2")
                     if stub == "[]":
                         file.write(LogList[k])
                         file.write("\n")
@@ -381,6 +412,7 @@ class HQFrame(Frame):
         model = 2  # model=2 表示ROBUSTNSS模式，即 备份发送
         self.text.insert(END, model)
 
+    # 删除两个月之前的log（Analyze）
     def clear(self):
         clr = os.listdir(Analyze)
         Date = time.strftime("%Y-%m-%d", time.localtime())
@@ -437,13 +469,14 @@ class HQFrame(Frame):
                             lir2.append("ofs1 > ofs2 -->" + lir[j])
             count = 0
             # 每组问题
-            with open(Err_Stub, 'w', encoding="utf-8") as f:
+            with open(Err_Stub_ofs, 'w', encoding="utf-8") as f:
                 for n in range(len(lir2)):
                     f.write(lir2[n])
                     count += 1
                     if count == 2:
                         count = 0
                         f.write("======================\n")
+            showinfo(title="完成", message="检测结束")
 
     def JudgeSegment(self):
         flag = 0
@@ -506,20 +539,19 @@ class HQFrame(Frame):
 
     def GetCpu(self):
         flag = 0
-        try:
-            client = InfluxDBClient(host="127.0.0.1", port=8086)
-            flag = 1
-        except ConnectionRefusedError:
-            showerror(title="ConnectionError", message="数据库连接失败！")
-            flag = 0
-        if flag == 1:
-            usr_cpu = client.query('select value from "processes_user" limit 1000', database="collectd")
-            ker_cpu = client.query('select * from "processes_syst" limit 1000', database="collectd")
-            phy_mem = client.query('select * from "processes_value" limit 1000', database="collectd")
-            sys_mem = client.query('select * from "memory_value" limit 1000', database="collectd")
-            free_cpu = client.query('select * from "cpu_value" limit 1000', database="collectd")
+        # try:
+        #     client = InfluxDBClient(host="127.0.0.1", port=8086)
+        #     flag = 1
+        # except ConnectionRefusedError:
+        #     showerror(title="ConnectionError", message="数据库连接失败！")
+        #     flag = 0
+        if flag == 0:
+            # usr_cpu = client.query('select value from "processes_user" limit 1000', database="collectd")
+            # ker_cpu = client.query('select * from "processes_syst" limit 1000', database="collectd")
+            # phy_mem = client.query('select * from "processes_value" limit 1000', database="collectd")
+            # sys_mem = client.query('select * from "memory_value" limit 1000', database="collectd")
+            # free_cpu = client.query('select * from "cpu_value" limit 1000', database="collectd")
 
-            # print("Result: {0}".format(usr_cpu))
             showinfo(title="未完成", message="开发中")
             # with open(data_route+"\\cpu.txt", 'w', encoding="utf-8") as f:
             #     f.write("Result: {0}".format(usr_cpu))
@@ -527,7 +559,7 @@ class HQFrame(Frame):
             #     f.write("Result: {0}".format(ker_cpu))
 
     def CpData(self):
-        showinfo("YES!", message="未开发")
+        showinfo("HINT!", message="未开发")
 
     def createPage(self):  # 界面布局  下同
         # Label(self).grid(row=1, stick=W, pady=10)
@@ -540,14 +572,14 @@ class HQFrame(Frame):
         Button(self, width="20", height="1", text="START:创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=2)
         # ----------------------------------------------------------------------------------------------
         Button(self, width="20", height="1", text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
-        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=1, column=5)
+        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=2)
         # 此按钮功能暂定
         # Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
         # 判断Av Log中的position消息的offset
         self.text = Text(self, width="10", height="1")
         self.text.grid(row=5, column=0)
         Button(self, width="15", height="1", text="BANDWIDTH", command=self.BANDWIDTH).grid(row=5, column=1)
-        Button(self, width="15", height="1", text="ROBUSTNESS", command=self.ROBUSTNSS).grid(row=5, column=2)
+        Button(self, width="15", height="1", text="ROBUSTNSS", command=self.ROBUSTNSS).grid(row=5, column=2)
         Button(self, width="20", height="1", text="显示Slope", command=self.ShowSlope).grid(row=5, column=3)
         Button(self, width="20", height="1", text="判断Position的offset", command=self.JudgePosition).grid(row=4, column=0)
         Button(self, width="20", height="1", text="提取各个MSG", command=self.Sep_MSG).grid(row=3, column=0)
