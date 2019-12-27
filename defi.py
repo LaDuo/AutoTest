@@ -1,17 +1,17 @@
-import re
 import os
+import re
 import threading
-import time
-import requests
-import clr
-import PySimpleGUI as sg
-from influxdb import InfluxDBClient
+from tkinter.messagebox import showinfo, showwarning, showerror
+# from tkinter import *
+from tkinter import Tk
+from tkinter import Frame, StringVar
+from tkinter import END, Label, Entry, Button, Text, Menu
 import shutil
-import zipfile
+import time
 import matplotlib.pyplot as plt
 from datetime import datetime
 from subprocess import Popen, PIPE, STDOUT
-from tkinter.messagebox import *
+
 
 # 此文件用于添加定义、变量
 Desktop = os.path.join(os.path.expanduser('~'), "Desktop")
@@ -24,13 +24,23 @@ base_path1 = "D:\\test\\Release\\log\\"  # Av2数据所在路径     重点关�
 # --------------------------------------------------------
 global model
 
-with open(Av2_log, 'r', encoding="utf-8") as file:
-    lists = file.readlines()
-
+# MSG ERR Path
 Err_Position = os.path.join(Av2_Output, "Err_Pos.txt")  # 打印Av2Log中的Position的offset异常
 Err_Stub_ofs = os.path.join(Av2_Output, "Err_Stub_ofs.txt")
 Err_Stub_send = os.path.join(Av2_Output, "Err_Stub_send.txt")
 Err_Segment = os.path.join(Av2_Output, "Err_Segment.txt")
+Err_cyclic = os.path.join(Av2_Output, "Err_cyclic.txt")
+cyclic_pos = os.path.join(Av2_Output, "cyclic_pos.txt")
+cyclic_stub = os.path.join(Av2_Output, "cyclic_stub.txt")
+cyclic_seg = os.path.join(Av2_Output, "cyclic_seg.txt")
+cyclic_prl1 = os.path.join(Av2_Output, "cyclic_prl1.txt")
+cyclic_prl2 = os.path.join(Av2_Output, "cyclic_prl2.txt")
+cyclic_prl9 = os.path.join(Av2_Output, "cyclic_prl9.txt")
+cyclic_prs1 = os.path.join(Av2_Output, "cyclic_prs1.txt")
+cyclic_prs4 = os.path.join(Av2_Output, "cyclic_prs4.txt")
+cyclic_meta = os.path.join(Av2_Output, "cyclic_meta.txt")
+
+# MSG path
 stub_position = os.path.join(Av2_Output, "sub&position.txt")
 stub_path = os.path.join(Av2_Output, "stub.txt")
 meta_path = os.path.join(Av2_Output, "meta.txt")
@@ -89,7 +99,7 @@ offroad = "['Position: path=2']"
 seg_path_id = re.compile(r'path=\d+')
 seg_offset = re.compile(r'ofs=\d+')
 seg_bridge = re.compile(r'isBridge=av2_true')
-seg_cyclic = re.compile(r'cyclic=\d')
+cyclic = re.compile(r'cyclic=\d')
 
 # InfluxDB
 data_route = "D:\\test\\InfluxDBdata"
@@ -98,6 +108,6 @@ data_route = "D:\\test\\InfluxDBdata"
 slope_path_id = re.compile(r'path=\d+')
 slope_value = re.compile(r'value=\d+')
 slope_value1 = re.compile(r'value1=\d+')
-slope_cyc = re.compile(r'cyclic=\d')
 slope_ofs = re.compile(r'offs=\d+')
 slope_dis = re.compile(r'distance1=\d+')
+

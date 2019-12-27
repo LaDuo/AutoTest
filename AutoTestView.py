@@ -1,4 +1,3 @@
-from tkinter import *
 from defi import *
 
 
@@ -9,7 +8,6 @@ class HQFrame(Frame):
         self.map_names = None
         self.var = StringVar()
         self.createPage()
-
 
     def AvLog(self):  # 将桌面上的Av2_Input文件夹中的Av2 Log合并放置在Av2_Output文件夹中的outfile.txt中
         files = os.listdir(Av2_Input)
@@ -136,11 +134,11 @@ class HQFrame(Frame):
         showinfo(title="Create Move Download Merge", message="Success！")
 
     def DeleteAvLog(self):
-        # Avlog1 = os.listdir(base_path1)
-        # for i in Avlog1:
-        #     if ".txt" in i:
-        #         path = os.path.join(base_path1, i)
-        #         os.remove(path)
+        Avlog1 = os.listdir(base_path1)
+        for i in Avlog1:
+            if ".txt" in i:
+                path = os.path.join(base_path1, i)
+                os.remove(path)
         Avlog2 = os.listdir(Av2_Input)
         for i in Avlog2:
             if ".txt" in i:
@@ -154,6 +152,8 @@ class HQFrame(Frame):
         showinfo(title="Delete AvLog", message="成功删除Av Log")
 
     def Sep_MSG(self):
+        with open(Av2_log, 'r', encoding="utf-8") as file:
+            lists = file.readlines()
         # stub msg
         t1 = threading.Thread(target=HQFrame.action, args=(self, stub_path, pat_Stub))
         t1.start()
@@ -197,7 +197,9 @@ class HQFrame(Frame):
                     file.write(str(lists[i]))
         showinfo(title="提取MSG", message="成功提取各个MSG！")
 
-    def action(self, route, pat,):
+    def action(self, route, pat, ):
+        with open(Av2_log, 'r', encoding="utf-8") as file:
+            lists = file.readlines()
         pats = re.compile(pat)
         with open(route, 'w', encoding="utf-8") as file:
             for i in range(len(lists)):
@@ -348,14 +350,14 @@ class HQFrame(Frame):
             if i.startswith("loc") and "INFO" in i and "Nebu" in i:
                 list_loc.append(i)
         # adasis_INFO.txt
-        # ada_result = Av2_Output + "\\adasis_INFO.txt"
-        # file = open(ada_result, 'w')
-        # for a in list_ada:
-        #     path = folder + "\\" + a
-        #     for line in open(path):
-        #         file.write(line)
-        #     file.write("\n")
-        # file.close()
+        ada_result = Av2_Output + "\\adasis_INFO.txt"
+        file = open(ada_result, 'w')
+        for a in list_ada:
+            path = folder + "\\" + a
+            for line in open(path):
+                file.write(line)
+            file.write("\n")
+        file.close()
         # ehp_INFO.txt
         ehp_result = Av2_Output + "\\ehp_INFO.txt"
         file = open(ehp_result, 'w')
@@ -502,9 +504,9 @@ class HQFrame(Frame):
                 ofs1 = int(re.sub(r'\D', "", ofs1))
                 ofs2 = int(re.sub(r'\D', "", ofs2))
                 bridge = seg_bridge.findall(lir[i])
-                cyclic1 = str(seg_cyclic.findall(lir[i]))
+                cyclic1 = str(cyclic.findall(lir[i]))
                 cyclic1 = int(re.sub(r'\D', "", cyclic1))
-                cyclic2 = str(seg_cyclic.findall(lir[j]))
+                cyclic2 = str(cyclic.findall(lir[j]))
                 cyclic2 = int(re.sub(r'\D', "", cyclic2))
                 if bridge:
                     bri.append(lir[i])
@@ -558,6 +560,64 @@ class HQFrame(Frame):
             # with open(data_route+"\\memory.txt", 'w', encoding="utf-8") as f:
             #     f.write("Result: {0}".format(ker_cpu))
 
+    def Cyclic(self):
+        # stub msg
+        t1 = threading.Thread(target=HQFrame.thread_cyc, args=(self, stub_path, cyclic_stub))
+        t1.start()
+        # position msg
+        t2 = threading.Thread(target=HQFrame.thread_cyc, args=(self, pos_path, cyclic_pos))
+        t2.start()
+        # segment msg
+        t3 = threading.Thread(target=HQFrame.thread_cyc, args=(self, seg_path, cyclic_seg))
+        t3.start()
+        # profile long type 1
+        t4 = threading.Thread(target=HQFrame.thread_cyc, args=(self, prl1_path, cyclic_prl1))
+        t4.start()
+        # profile long type 2
+        t5 = threading.Thread(target=HQFrame.thread_cyc, args=(self, prl2_path, cyclic_prl2))
+        t5.start()
+        # profile long type 9
+        t6 = threading.Thread(target=HQFrame.thread_cyc, args=(self, prl9_path, cyclic_prl9))
+        t6.start()
+        # profile short type 1
+        t7 = threading.Thread(target=HQFrame.thread_cyc, args=(self, prs1_path, cyclic_prs1))
+        t7.start()
+        # profile short type 4
+        t8 = threading.Thread(target=HQFrame.thread_cyc, args=(self, prs4_path, cyclic_prs4))
+        t8.start()
+        # Metadata
+        t9 = threading.Thread(target=HQFrame.thread_cyc, args=(self, meta_path, cyclic_meta))
+        t9.start()
+        showinfo(title="丢包判断", message="判断结束")
+
+    def thread_cyc(self, route, path):
+        with open(route, 'r', encoding="utf-8") as file:
+            lir = file.readlines()
+        print(threading.current_thread().getName(), "+", route)
+        with open(path, 'w', encoding="utf-8") as f:
+            for i in range(len(lir)):
+                if i == len(lir) - 1:
+                    break
+                j = i + 1
+                mode1 = str(cyclic.findall(lir[i]))
+                mode2 = str(cyclic.findall(lir[j]))
+                if mode1 == "['cyclic=0']":
+                    if mode2 != "['cyclic=1']":
+                        f.write(lir[j])
+                        f.write("\n")
+                elif mode1 == "['cyclic=1']":
+                    if mode2 != "['cyclic=2']":
+                        f.write(lir[j])
+                        f.write("\n")
+                elif mode1 == "['cyclic=2']":
+                    if mode2 != "['cyclic=3']":
+                        f.write(lir[j])
+                        f.write("\n")
+                elif mode1 == "['cyclic=3']":
+                    if mode2 != "['cyclic=0']":
+                        f.write(lir[j])
+                        f.write("\n")
+
     def CpData(self):
         showinfo("HINT!", message="未开发")
 
@@ -572,7 +632,8 @@ class HQFrame(Frame):
         Button(self, width="20", height="1", text="START:创建文件夹", command=self.CreateMoveMerge).grid(row=1, column=2)
         # ----------------------------------------------------------------------------------------------
         Button(self, width="20", height="1", text="合并Av2Log", command=self.AvLog).grid(row=2, column=0)
-        Button(self, width="20", height="1", text="END:删除所有的Av2Log", command=self.DeleteAvLog).grid(row=2, column=2)
+        Button(self, width="20", height="1", text="！！！删除所有的Av2Log", bg="red", command=self.DeleteAvLog).grid(row=2,
+                                                                                                             column=2)
         # 此按钮功能暂定
         # Button(self, text="获取Av2Log中的Position", command=self.Av_position).grid(row=2, column=2)
         # 判断Av Log中的position消息的offset
@@ -591,6 +652,7 @@ class HQFrame(Frame):
         Button(self, width="20", height="1", text="stub_offset是否递增", command=self.JudgeStub).grid(row=6, column=1)
         Button(self, width="20", height="1", text="segment消息检测", command=self.JudgeSegment).grid(row=6, column=2)
         Button(self, width="20", height="1", text="提取性能数据", command=self.GetCpu).grid(row=7, column=0)
+        Button(self, width="20", height="1", text="判断所有MSG是否丢包", command=self.Cyclic).grid(row=7, column=1)
 
 
 class WabcoFrame(Frame):
